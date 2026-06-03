@@ -1,3 +1,4 @@
+[![Live Preview](https://img.shields.io/badge/🌐_Live_Preview-Click_Here-FF6B00?style=for-the-badge)](https://akshatanand-cell.github.io/fed-kiit-homepage/)
 <div align="center">
 
 <img src="https://img.shields.io/badge/FED-KIIT-FF6B00?style=for-the-badge&labelColor=0D0D1A&color=FF6B00" alt="FED KIIT"/>
