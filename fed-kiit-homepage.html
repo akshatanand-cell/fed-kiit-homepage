@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FED KIIT — Federation of Entrepreneurship Development</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ── TOKENS ── */
+:root{
+  --orange:#FF6B00;--orange-dim:rgba(255,107,0,.13);--orange-glow:rgba(255,107,0,.35);
+  --bg:#08080E;--bg2:#0F0F1A;--bg3:#141428;
+  --surface:rgba(255,255,255,.04);--surface-hover:rgba(255,255,255,.08);
+  --border:rgba(255,255,255,.08);
+  --text:#F2F2F2;--text-dim:rgba(242,242,242,.55);--text-muted:rgba(242,242,242,.3);
+  --font-h:'Syne',sans-serif;--font-b:'Outfit',sans-serif;
+  --r:16px;--rs:10px;--tr:.45s cubic-bezier(.23,1,.32,1);
+}
+[data-theme="light"]{
+  --bg:#F7F5F0;--bg2:#EDEAE2;--bg3:#E4E0D6;
+  --surface:rgba(0,0,0,.04);--surface-hover:rgba(0,0,0,.07);
+  --border:rgba(0,0,0,.1);
+  --text:#0A0A0F;--text-dim:rgba(10,10,15,.6);--text-muted:rgba(10,10,15,.35);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);overflow-x:hidden;cursor:none;transition:background var(--tr),color var(--tr);}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E");pointer-events:none;z-index:1;opacity:.35;}
+
+/* ── CURSOR ── */
+#cur{width:10px;height:10px;border-radius:50%;background:var(--orange);position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .12s;}
+#cur-ring{width:34px;height:34px;border:1.5px solid var(--orange);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;opacity:.5;transform:translate(-50%,-50%);transition:width .3s,height .3s,opacity .3s;}
+
+/* ── SCROLL BAR ── */
+#prog{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--orange),#ffaa00);z-index:3000;transition:width .08s;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:20px 60px;display:flex;align-items:center;justify-content:space-between;transition:background .4s,padding .4s,border-color .4s;}
+nav.sc{background:rgba(8,8,14,.88);backdrop-filter:blur(24px);padding:13px 60px;border-bottom:1px solid var(--border);box-shadow:0 4px 40px rgba(0,0,0,.3);}
+[data-theme="light"] nav.sc{background:rgba(247,245,240,.88);}
+.n-logo{font-family:var(--font-h);font-size:1.45rem;font-weight:800;color:var(--text);text-decoration:none;letter-spacing:-.02em;cursor:none;}
+.n-logo span{color:var(--orange);}
+.n-links{display:flex;gap:32px;list-style:none;align-items:center;}
+.n-links a{color:var(--text-dim);text-decoration:none;font-size:.82rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;transition:color .3s;position:relative;cursor:none;}
+.n-links a::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1.5px;background:var(--orange);transform:scaleX(0);transform-origin:right;transition:transform .35s cubic-bezier(.23,1,.32,1);}
+.n-links a:hover,.n-links a.active{color:var(--text);}
+.n-links a:hover::after,.n-links a.active::after{transform:scaleX(1);transform-origin:left;}
+.n-act{display:flex;gap:10px;align-items:center;}
+.btn-th{width:40px;height:40px;border-radius:50%;background:var(--surface);border:1px solid var(--border);color:var(--text-dim);cursor:none;display:flex;align-items:center;justify-content:center;font-size:.95rem;transition:all .3s;}
+.btn-th:hover{background:var(--surface-hover);color:var(--orange);border-color:var(--orange);}
+.btn-cta{padding:10px 22px;background:var(--orange);color:#fff;border:none;border-radius:8px;font-family:var(--font-b);font-size:.82rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:none;text-decoration:none;transition:all .3s;box-shadow:0 0 0 rgba(255,107,0,0);}
+.btn-cta:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,107,0,.45);}
+.ham{display:none;flex-direction:column;gap:5px;cursor:none;background:none;border:none;padding:6px;}
+.ham span{width:22px;height:2px;background:var(--text);border-radius:2px;transition:all .3s;display:block;}
+
+/* ── PAGE SYSTEM ── */
+.page{display:none;min-height:100vh;animation:pageIn .5s cubic-bezier(.23,1,.32,1) both;}
+.page.active{display:block;}
+@keyframes pageIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:none;}}
+
+/* ── CANVAS ── */
+#hero-canvas{position:absolute;inset:0;z-index:0;}
+
+/* ── HERO ── */
+#hero-section{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:140px 60px 80px;}
+.h-glow{position:absolute;width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,0,.11) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:1;animation:pg 7s ease-in-out infinite;}
+@keyframes pg{0%,100%{transform:translate(-50%,-50%) scale(1);}50%{transform:translate(-50%,-50%) scale(1.18);}}
+.h-content{position:relative;z-index:2;text-align:center;max-width:920px;}
+.h-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border:1px solid var(--orange-glow);border-radius:50px;background:var(--orange-dim);font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);margin-bottom:28px;opacity:0;animation:fu .8s .2s forwards;}
+.h-badge::before{content:'●';font-size:.45rem;animation:bl 2s infinite;}
+@keyframes bl{0%,100%{opacity:1;}50%{opacity:.25;}}
+.h-title{font-family:var(--font-h);font-size:clamp(3rem,7vw,6.5rem);font-weight:800;line-height:1;letter-spacing:-.03em;margin-bottom:22px;opacity:0;animation:fu .9s .4s forwards;}
+.h-title .ora{color:var(--orange);display:inline-block;position:relative;}
+.h-title .ora::after{content:'';position:absolute;left:0;bottom:2px;width:100%;height:5px;background:linear-gradient(90deg,var(--orange),#ffcc00);border-radius:3px;transform-origin:left;animation:dl 1s 1.3s both;}
+@keyframes dl{from{transform:scaleX(0);}to{transform:scaleX(1);}}
+.h-sub{font-size:1.12rem;color:var(--text-dim);max-width:580px;margin:0 auto 44px;line-height:1.75;opacity:0;animation:fu .9s .6s forwards;}
+.h-ctas{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;opacity:0;animation:fu .9s .8s forwards;}
+.btn-p{padding:15px 36px;background:var(--orange);color:#fff;border:none;border-radius:var(--rs);font-family:var(--font-b);font-size:.95rem;font-weight:700;cursor:none;text-decoration:none;transition:all .35s;display:inline-flex;align-items:center;gap:10px;box-shadow:0 4px 24px rgba(255,107,0,.3);}
+.btn-p:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(255,107,0,.5);}
+.btn-s{padding:15px 36px;background:transparent;color:var(--text);border:1.5px solid var(--border);border-radius:var(--rs);font-family:var(--font-b);font-size:.95rem;font-weight:500;cursor:none;text-decoration:none;transition:all .35s;display:inline-flex;align-items:center;gap:10px;}
+.btn-s:hover{border-color:var(--orange);color:var(--orange);transform:translateY(-3px);}
+.h-stats{display:flex;justify-content:center;gap:64px;margin-top:72px;opacity:0;animation:fu .9s 1s forwards;padding-top:48px;border-top:1px solid var(--border);}
+.s-item{text-align:center;}
+.s-num{font-family:var(--font-h);font-size:2.5rem;font-weight:800;color:var(--orange);line-height:1;}
+.s-lbl{font-size:.75rem;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;margin-top:5px;}
+@keyframes fu{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:none;}}
+
+/* ── SECTION BASE ── */
+section.sec{padding:110px 60px;position:relative;}
+.s-lbl2{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--orange);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.s-lbl2::before{content:'';width:28px;height:1.5px;background:var(--orange);}
+.s-title{font-family:var(--font-h);font-size:clamp(1.9rem,4vw,3rem);font-weight:800;line-height:1.08;letter-spacing:-.02em;margin-bottom:14px;}
+.s-desc{color:var(--text-dim);font-size:.95rem;line-height:1.8;max-width:500px;}
+.rev{opacity:0;transform:translateY(36px);transition:opacity .8s cubic-bezier(.23,1,.32,1),transform .8s cubic-bezier(.23,1,.32,1);}
+.rev.vis{opacity:1;transform:none;}
+
+/* ── ABOUT PAGE ── */
+.about-hero{background:var(--bg2);padding:140px 60px 80px;text-align:center;}
+.about-hero h1{font-family:var(--font-h);font-size:clamp(2.5rem,6vw,5rem);font-weight:800;letter-spacing:-.03em;margin:20px 0;}
+.about-hero p{color:var(--text-dim);max-width:620px;margin:0 auto;font-size:1.05rem;line-height:1.8;}
+.about-story{padding:100px 60px;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+.about-vis{position:relative;aspect-ratio:1;max-width:440px;}
+.a-ring{position:absolute;inset:0;border-radius:50%;border:1px solid var(--orange-glow);animation:sp 30s linear infinite;}
+.a-ring:nth-child(2){inset:12%;border-color:rgba(255,107,0,.1);animation-duration:20s;animation-direction:reverse;}
+.a-ring:nth-child(3){inset:26%;animation-duration:45s;}
+@keyframes sp{to{transform:rotate(360deg);}}
+.a-center{position:absolute;inset:36%;background:var(--orange);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-size:1.6rem;font-weight:800;color:#fff;box-shadow:0 0 60px rgba(255,107,0,.4);}
+.a-orb{position:absolute;width:50px;height:50px;background:var(--bg3);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 4px 20px rgba(0,0,0,.3);}
+.a-orb:nth-child(5){top:5%;left:50%;transform:translateX(-50%);}
+.a-orb:nth-child(6){top:50%;right:5%;transform:translateY(-50%);}
+.a-orb:nth-child(7){bottom:5%;left:50%;transform:translateX(-50%);}
+.a-orb:nth-child(8){top:50%;left:5%;transform:translateY(-50%);}
+.pillars{display:flex;flex-direction:column;gap:18px;margin-top:36px;}
+.pillar{display:flex;gap:16px;align-items:flex-start;padding:20px 22px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);transition:all .3s;}
+.pillar:hover{background:var(--surface-hover);border-color:var(--orange-glow);transform:translateX(6px);}
+.p-icon{font-size:1.3rem;flex-shrink:0;margin-top:2px;}
+.pillar h4{font-family:var(--font-h);font-size:.95rem;font-weight:700;margin-bottom:4px;}
+.pillar p{font-size:.82rem;color:var(--text-dim);line-height:1.6;}
+.team-section{background:var(--bg2);padding:100px 60px;}
+.team-grid{max-width:1100px;margin:48px auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;}
+.team-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:32px 24px;text-align:center;transition:all .4s;cursor:none;}
+.team-card:hover{background:var(--surface-hover);border-color:var(--orange-glow);transform:translateY(-6px);box-shadow:0 16px 48px rgba(0,0,0,.3);}
+.t-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#ffaa00);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:800;color:#fff;font-family:var(--font-h);}
+.team-card h4{font-family:var(--font-h);font-size:.95rem;font-weight:700;margin-bottom:4px;}
+.team-card p{font-size:.78rem;color:var(--text-dim);}
+
+/* ── PROGRAMS PAGE ── */
+.prog-hero{background:var(--bg);padding:140px 60px 80px;}
+.prog-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;padding:0 60px 100px;}
+.p-card{padding:36px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);transition:all var(--tr);position:relative;overflow:hidden;cursor:none;}
+.p-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--orange),transparent);transform:scaleX(0);transition:transform .5s;}
+.p-card:hover{background:var(--surface-hover);border-color:var(--orange-glow);transform:translateY(-6px);box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.p-card:hover::before{transform:scaleX(1);}
+.p-card.feat{background:linear-gradient(135deg,rgba(255,107,0,.12),rgba(255,107,0,.04));border-color:rgba(255,107,0,.3);grid-column:span 2;}
+.p-ico{font-size:2rem;margin-bottom:18px;}
+.p-card h3{font-family:var(--font-h);font-size:1.15rem;font-weight:700;margin-bottom:10px;}
+.p-card p{font-size:.855rem;color:var(--text-dim);line-height:1.7;}
+.p-tag{display:inline-block;margin-top:18px;padding:5px 14px;background:var(--orange-dim);color:var(--orange);border-radius:50px;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+
+/* ── EVENTS PAGE ── */
+.ev-hero{background:var(--bg2);padding:140px 60px 80px;}
+.ev-timeline{max-width:900px;margin:0 auto;padding:80px 60px;}
+.ev-item{display:flex;gap:40px;margin-bottom:60px;position:relative;}
+.ev-item::before{content:'';position:absolute;left:39px;top:60px;bottom:-60px;width:1px;background:var(--border);}
+.ev-item:last-child::before{display:none;}
+.ev-dot{width:80px;height:80px;border-radius:50%;background:var(--orange-dim);border:2px solid var(--orange-glow);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;transition:all .3s;}
+.ev-item:hover .ev-dot{background:var(--orange);box-shadow:0 0 32px rgba(255,107,0,.4);border-color:var(--orange);}
+.ev-body{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:32px;flex:1;transition:all .3s;}
+.ev-item:hover .ev-body{border-color:var(--orange-glow);background:var(--surface-hover);}
+.ev-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:var(--orange-dim);color:var(--orange);border-radius:6px;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px;}
+.ev-body h3{font-family:var(--font-h);font-size:1.2rem;font-weight:700;margin-bottom:8px;}
+.ev-body p{font-size:.855rem;color:var(--text-dim);line-height:1.7;margin-bottom:16px;}
+.ev-meta{display:flex;gap:20px;flex-wrap:wrap;}
+.ev-meta span{font-size:.78rem;color:var(--text-muted);display:flex;align-items:center;gap:5px;}
+
+/* ── CONTACT PAGE ── */
+.con-hero{background:var(--bg);padding:140px 60px 80px;text-align:center;}
+.con-hero h1{font-family:var(--font-h);font-size:clamp(2.5rem,6vw,5rem);font-weight:800;letter-spacing:-.03em;margin:20px 0;}
+.con-body{max-width:1100px;margin:0 auto;padding:80px 60px;display:grid;grid-template-columns:1fr 1.2fr;gap:72px;align-items:start;}
+.con-links{display:flex;flex-direction:column;gap:14px;margin-top:36px;}
+.con-link{display:flex;gap:16px;align-items:center;padding:18px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);text-decoration:none;color:var(--text);transition:all .3s;cursor:none;}
+.con-link:hover{background:var(--surface-hover);border-color:var(--orange-glow);transform:translateX(4px);}
+.con-ico{font-size:1.2rem;width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:var(--orange-dim);border-radius:10px;flex-shrink:0;}
+.con-link strong{font-size:.88rem;font-weight:600;display:block;margin-bottom:2px;}
+.con-link span{font-size:.78rem;color:var(--text-dim);}
+.con-form{display:flex;flex-direction:column;gap:15px;}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:15px;}
+.f-field label{display:block;font-size:.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-dim);margin-bottom:7px;}
+.f-field input,.f-field textarea,.f-field select{width:100%;padding:13px 16px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rs);color:var(--text);font-family:var(--font-b);font-size:.88rem;transition:all .3s;outline:none;cursor:none;}
+.f-field input:focus,.f-field textarea:focus,.f-field select:focus{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-dim);}
+.f-field textarea{resize:vertical;min-height:130px;}
+.f-field select option{background:#141428;color:#fff;}
+[data-theme="light"] .f-field select option{background:#edeae2;color:#0a0a0f;}
+.btn-sub{padding:15px 38px;background:var(--orange);color:#fff;border:none;border-radius:var(--rs);font-family:var(--font-b);font-size:.95rem;font-weight:700;cursor:none;transition:all .3s;display:flex;align-items:center;gap:10px;box-shadow:0 4px 24px rgba(255,107,0,.25);align-self:flex-start;}
+.btn-sub:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(255,107,0,.45);}
+
+/* ── HOMEPAGE SECTIONS ── */
+.home-about{background:var(--bg2);}
+.ha-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+.home-programs{background:var(--bg);}
+.hp-inner{max-width:1200px;margin:0 auto;}
+.hp-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:56px;flex-wrap:wrap;gap:20px;}
+.hp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+.home-events{background:var(--bg2);}
+.he-inner{max-width:1200px;margin:0 auto;}
+.he-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:22px;margin-top:56px;}
+.ev-main{background:linear-gradient(135deg,var(--bg3),var(--bg2));border:1px solid var(--border);border-radius:var(--r);padding:44px;overflow:hidden;position:relative;transition:all .4s;}
+.ev-main::after{content:'';position:absolute;bottom:-80px;right:-80px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,0,.12),transparent 70%);}
+.ev-main:hover{transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.ev-main h3{font-family:var(--font-h);font-size:1.7rem;font-weight:800;line-height:1.15;margin:16px 0 12px;}
+.ev-main p{color:var(--text-dim);font-size:.88rem;line-height:1.75;margin-bottom:26px;}
+.ev-side{display:flex;flex-direction:column;gap:14px;}
+.evc{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:22px;display:flex;gap:18px;align-items:flex-start;transition:all .3s;cursor:none;}
+.evc:hover{background:var(--surface-hover);border-color:var(--orange-glow);transform:translateX(4px);}
+.evc-n{font-family:var(--font-h);font-size:.72rem;font-weight:800;color:var(--orange);letter-spacing:.1em;flex-shrink:0;margin-top:2px;}
+.evc h4{font-family:var(--font-h);font-size:.9rem;font-weight:700;margin-bottom:5px;}
+.evc p{font-size:.8rem;color:var(--text-dim);line-height:1.6;}
+
+/* ── FOOTER ── */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:56px 60px;}
+.ft-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:28px;}
+.ft-logo{font-family:var(--font-h);font-size:1.35rem;font-weight:800;color:var(--text);letter-spacing:-.02em;}
+.ft-logo span{color:var(--orange);}
+.ft-sub{font-size:.78rem;color:var(--text-muted);margin-top:4px;}
+.ft-links{display:flex;gap:24px;flex-wrap:wrap;}
+.ft-links a{color:var(--text-dim);text-decoration:none;font-size:.82rem;transition:color .3s;cursor:none;}
+.ft-links a:hover{color:var(--orange);}
+.ft-copy{font-size:.75rem;color:var(--text-muted);text-align:center;width:100%;padding-top:28px;border-top:1px solid var(--border);margin-top:12px;}
+
+/* ── MOBILE NAV ── */
+.mob-nav{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg2);z-index:900;flex-direction:column;align-items:center;justify-content:center;gap:32px;}
+.mob-nav.open{display:flex;animation:pageIn .3s ease both;}
+.mob-nav a{font-family:var(--font-h);font-size:2rem;font-weight:800;color:var(--text);text-decoration:none;cursor:none;}
+.mob-nav a:hover{color:var(--orange);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){
+  nav{padding:16px 32px;}nav.sc{padding:12px 32px;}
+  section.sec{padding:72px 32px;}
+  .ha-inner,.about-story,.con-body{grid-template-columns:1fr;gap:56px;}
+  .about-vis,.a-vis2{max-width:300px;margin:0 auto;}
+  .hp-grid,.prog-grid{grid-template-columns:repeat(2,1fr);}
+  .p-card.feat{grid-column:auto;}
+  .he-grid,.ev-grid{grid-template-columns:1fr;}
+  .team-grid{grid-template-columns:repeat(2,1fr);}
+  .ev-timeline{padding:60px 32px;}
+}
+@media(max-width:768px){
+  nav{padding:14px 24px;}nav.sc{padding:10px 24px;}
+  .n-links{display:none;}.ham{display:flex;}
+  #hero-section{padding:100px 24px 60px;}
+  .h-stats{gap:28px;flex-wrap:wrap;}
+  section.sec{padding:56px 24px;}
+  .hp-grid,.prog-grid{grid-template-columns:1fr;}
+  .f-row{grid-template-columns:1fr;}
+  footer{padding:36px 24px;}
+  .ft-inner{flex-direction:column;align-items:flex-start;}
+  .about-hero,.prog-hero,.ev-hero,.con-hero{padding:100px 24px 56px;}
+  .about-story,.team-section,.ev-timeline,.con-body{padding-left:24px;padding-right:24px;}
+  .team-grid{grid-template-columns:repeat(2,1fr);}
+  .prog-grid{padding-left:24px;padding-right:24px;padding-bottom:60px;}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur-ring"></div>
+<div id="prog"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#" class="n-logo" data-nav="home">FED<span>KIIT</span></a>
+  <ul class="n-links">
+    <li><a href="#" data-nav="home" class="active">Home</a></li>
+    <li><a href="#" data-nav="about">About</a></li>
+    <li><a href="#" data-nav="programs">Programs</a></li>
+    <li><a href="#" data-nav="events">Events</a></li>
+    <li><a href="#" data-nav="contact">Contact</a></li>
+  </ul>
+  <div class="n-act">
+    <button class="btn-th" id="themeBtn">🌙</button>
+    <a href="#" class="btn-cta" data-nav="contact">Join FED</a>
+    <button class="ham" id="hamBtn"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<!-- MOBILE NAV -->
+<div class="mob-nav" id="mobNav">
+  <a href="#" data-nav="home" data-close>Home</a>
+  <a href="#" data-nav="about" data-close>About</a>
+  <a href="#" data-nav="programs" data-close>Programs</a>
+  <a href="#" data-nav="events" data-close>Events</a>
+  <a href="#" data-nav="contact" data-close>Contact</a>
+</div>
+
+<!-- ═══════════════ HOME PAGE ═══════════════ -->
+<div class="page active" id="page-home">
+
+  <section id="hero-section">
+    <canvas id="hero-canvas"></canvas>
+    <div class="h-glow"></div>
+    <div class="h-content">
+      <div class="h-badge">KIIT TBI Student Body · Est. 2015</div>
+      <h1 class="h-title">Where Ideas Become<br/><span class="ora">Startups</span></h1>
+      <p class="h-sub">The Federation of Entrepreneurship Development brings together the brightest student innovators, mentors, and industry leaders under one powerful umbrella.</p>
+      <div class="h-ctas">
+        <a href="#" class="btn-p" data-nav="programs">Explore Programs <span>→</span></a>
+        <a href="#" class="btn-s" data-nav="about">Our Story</a>
+      </div>
+      <div class="h-stats">
+        <div class="s-item"><div class="s-num" data-count="500">0</div><div class="s-lbl">Members</div></div>
+        <div class="s-item"><div class="s-num" data-count="50">0</div><div class="s-lbl">Startups Incubated</div></div>
+        <div class="s-item"><div class="s-num" data-count="30">0</div><div class="s-lbl">Events Hosted</div></div>
+        <div class="s-item"><div class="s-num" data-count="100">0</div><div class="s-lbl">Mentors Network</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About snapshot -->
+  <section class="sec home-about">
+    <div class="ha-inner rev">
+      <div class="about-vis">
+        <div class="a-ring"></div><div class="a-ring"></div><div class="a-ring"></div>
+        <div class="a-center">FED</div>
+        <div class="a-orb">💡</div><div class="a-orb">🚀</div><div class="a-orb">🤝</div><div class="a-orb">📈</div>
+      </div>
+      <div>
+        <div class="s-lbl2">About FED</div>
+        <h2 class="s-title">Fueling the Next Generation of <span style="color:var(--orange)">Entrepreneurs</span></h2>
+        <p class="s-desc">FED KIIT is the official student body of KIIT TBI — a launchpad for ideas, a home for innovators, and a community that transforms ambition into real-world impact.</p>
+        <div class="pillars" style="margin-top:32px;">
+          <div class="pillar"><div class="p-icon">🎯</div><div><h4>Our Mission</h4><p>Bring all ideas and startups under one umbrella with resources, mentorship, and community.</p></div></div>
+          <div class="pillar"><div class="p-icon">🌐</div><div><h4>Our Network</h4><p>Connecting students with industry leaders, investors, and seasoned entrepreneurs.</p></div></div>
+          <div class="pillar"><div class="p-icon">⚡</div><div><h4>Our Impact</h4><p>Hundreds of members, dozens of startups, and a growing innovation ecosystem at KIIT.</p></div></div>
+        </div>
+        <a href="#" class="btn-s" data-nav="about" style="margin-top:28px;display:inline-flex;">Read Full Story →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Programs snapshot -->
+  <section class="sec home-programs">
+    <div class="hp-inner">
+      <div class="hp-head rev">
+        <div><div class="s-lbl2">What We Offer</div><h2 class="s-title">Programs Built for <span style="color:var(--orange)">Builders</span></h2></div>
+        <a href="#" class="btn-s" data-nav="programs">All Programs →</a>
+      </div>
+      <div class="hp-grid rev">
+        <div class="p-card feat"><div class="p-ico">🏆</div><h3>Bizz Battle</h3><p>The ultimate business challenge where aspiring entrepreneurs compete across multiple rounds of wit, innovation, and strategy. Test your limits and pitch to real investors.</p><p style="margin-top:10px;font-size:.82rem;color:var(--text-dim)">Multi-round · Cash prizes · Real investor pitches · Industry judges</p><div class="p-tag">Flagship Event</div></div>
+        <div class="p-card"><div class="p-ico">🧠</div><h3>Mentorship Program</h3><p>1-on-1 and group sessions with industry leaders who've built real ventures from scratch.</p><div class="p-tag">Ongoing</div></div>
+        <div class="p-card"><div class="p-ico">🛠️</div><h3>Skill Workshops</h3><p>Hands-on workshops covering product thinking, pitching, marketing, finance, and more.</p><div class="p-tag">Monthly</div></div>
+        <div class="p-card"><div class="p-ico">🌱</div><h3>Startup Incubation</h3><p>Access KIIT TBI's resources, co-working spaces, and full incubation support.</p><div class="p-tag">Apply Now</div></div>
+        <div class="p-card"><div class="p-ico">🔗</div><h3>Industry Connect</h3><p>Networking events, panel discussions and speaker sessions with founders and investors.</p><div class="p-tag">Quarterly</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Events snapshot -->
+  <section class="sec home-events">
+    <div class="he-inner">
+      <div class="rev" style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px;">
+        <div><div class="s-lbl2">Upcoming & Past</div><h2 class="s-title">Events That <span style="color:var(--orange)">Move You</span></h2></div>
+        <a href="#" class="btn-s" data-nav="events">All Events →</a>
+      </div>
+      <div class="he-grid rev">
+        <div class="ev-main">
+          <div class="ev-tag">📅 Coming Soon 2026</div>
+          <h3>Bizz Battle Season 2026</h3>
+          <p>The most anticipated entrepreneurship showdown at KIIT returns. Form your team, sharpen your pitch, and compete for glory and real investment opportunities.</p>
+          <div class="ev-meta"><span>📍 KIIT University, Bhubaneswar</span><span>👥 Open to all KIIT students</span></div>
+          <a href="#" class="btn-p" data-nav="contact" style="margin-top:24px;display:inline-flex;">Register Interest →</a>
+        </div>
+        <div class="ev-side">
+          <div class="evc"><div class="evc-n">01</div><div><h4>Skill Development Program</h4><p>High-impact session with Mr. Punit Chawla on UI/UX & product strategy.</p></div></div>
+          <div class="evc"><div class="evc-n">02</div><div><h4>Startup Ideation Bootcamp</h4><p>48-hour intensive: ideate, validate, and prototype real startup concepts.</p></div></div>
+          <div class="evc"><div class="evc-n">03</div><div><h4>Investor Pitch Night</h4><p>Selected FED teams pitch their startups to a panel of investors.</p></div></div>
+          <div class="evc"><div class="evc-n">04</div><div><h4>FED Annual Summit</h4><p>Talks, panels, awards, and networking all in one place.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <section class="sec" style="background:var(--bg);text-align:center;">
+    <div class="rev" style="max-width:700px;margin:0 auto;">
+      <div class="s-lbl2" style="justify-content:center;">Ready?</div>
+      <h2 class="s-title" style="font-size:clamp(2rem,5vw,3.5rem);">Be Part of the <span style="color:var(--orange)">Movement</span></h2>
+      <p class="s-desc" style="margin:16px auto 40px;max-width:480px;">Students, mentors, or industry partners — FED welcomes everyone who believes ideas can change the world.</p>
+      <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+        <a href="#" class="btn-p" data-nav="contact">Join FED Today →</a>
+        <a href="#" class="btn-s" data-nav="about">Learn More</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="ft-inner">
+      <div><div class="ft-logo">FED<span>KIIT</span></div><div class="ft-sub">Federation of Entrepreneurship Development · KIIT TBI</div></div>
+      <div class="ft-links">
+        <a href="#" data-nav="home">Home</a>
+        <a href="#" data-nav="about">About</a>
+        <a href="#" data-nav="programs">Programs</a>
+        <a href="#" data-nav="events">Events</a>
+        <a href="#" data-nav="contact">Contact</a>
+      </div>
+    </div>
+    <div class="ft-copy">© 2026 FED KIIT — Federation of Entrepreneurship Development. All rights reserved. Built with 🧡</div>
+  </footer>
+</div>
+
+<!-- ═══════════════ ABOUT PAGE ═══════════════ -->
+<div class="page" id="page-about">
+  <div class="about-hero">
+    <div class="s-lbl2" style="justify-content:center;">Our Story</div>
+    <h1>Building <span style="color:var(--orange)">Tomorrow's</span><br/>Entrepreneurs Today</h1>
+    <p>FED KIIT is more than a club — it's a launchpad, a community, and a movement rooted at KIIT University's TBI.</p>
+  </div>
+
+  <div class="about-story rev">
+    <div class="about-vis">
+      <div class="a-ring"></div><div class="a-ring"></div><div class="a-ring"></div>
+      <div class="a-center">FED</div>
+      <div class="a-orb">💡</div><div class="a-orb">🚀</div><div class="a-orb">🤝</div><div class="a-orb">📈</div>
+    </div>
+    <div>
+      <div class="s-lbl2">Who We Are</div>
+      <h2 class="s-title">The Official Student Body of <span style="color:var(--orange)">KIIT TBI</span></h2>
+      <p class="s-desc" style="margin-bottom:16px;">Founded under KIIT's Technology Business Incubator, FED exists to bring all ideas and potential startups under one umbrella by providing resources, connects, and mentors. We also organise gatherings to spread entrepreneurship-related awareness.</p>
+      <p class="s-desc">Our goal is simple: make entrepreneurship accessible to every student at KIIT, regardless of background or stream.</p>
+      <div class="pillars" style="margin-top:32px;">
+        <div class="pillar"><div class="p-icon">🎯</div><div><h4>Mission</h4><p>Empower students to ideate, validate, and build ventures that create real-world impact.</p></div></div>
+        <div class="pillar"><div class="p-icon">👁️</div><div><h4>Vision</h4><p>To be the leading student entrepreneurship ecosystem in Eastern India, fostering unicorn founders of tomorrow.</p></div></div>
+        <div class="pillar"><div class="p-icon">💎</div><div><h4>Values</h4><p>Innovation, Collaboration, Resilience, Integrity — we build with purpose and execute with passion.</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <section class="sec rev" style="background:var(--bg2);">
+    <div style="max-width:1100px;margin:0 auto;text-align:center;">
+      <div class="s-lbl2" style="justify-content:center;">By The Numbers</div>
+      <h2 class="s-title">FED's Growing <span style="color:var(--orange)">Impact</span></h2>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:32px;margin-top:56px;">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:40px 24px;text-align:center;">
+          <div class="s-num" data-count="500" style="font-size:3rem;">0</div><div class="s-lbl" style="margin-top:8px;">Active Members</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:40px 24px;text-align:center;">
+          <div class="s-num" data-count="50" style="font-size:3rem;">0</div><div class="s-lbl" style="margin-top:8px;">Startups Supported</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:40px 24px;text-align:center;">
+          <div class="s-num" data-count="30" style="font-size:3rem;">0</div><div class="s-lbl" style="margin-top:8px;">Events Hosted</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:40px 24px;text-align:center;">
+          <div class="s-num" data-count="100" style="font-size:3rem;">0</div><div class="s-lbl" style="margin-top:8px;">Mentors Network</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team -->
+  <div class="team-section">
+    <div style="max-width:1100px;margin:0 auto;">
+      <div class="s-lbl2">The People</div>
+      <h2 class="s-title">Leadership <span style="color:var(--orange)">Team</span></h2>
+    </div>
+    <div class="team-grid rev">
+      <div class="team-card"><div class="t-avatar">P</div><h4>President</h4><p>FED KIIT</p></div>
+      <div class="team-card"><div class="t-avatar">V</div><h4>Vice President</h4><p>FED KIIT</p></div>
+      <div class="team-card"><div class="t-avatar">S</div><h4>Secretary</h4><p>Operations Lead</p></div>
+      <div class="team-card"><div class="t-avatar">T</div><h4>Tech Lead</h4><p>Digital & Design</p></div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="ft-inner">
+      <div><div class="ft-logo">FED<span>KIIT</span></div><div class="ft-sub">Federation of Entrepreneurship Development · KIIT TBI</div></div>
+      <div class="ft-links">
+        <a href="#" data-nav="home">Home</a><a href="#" data-nav="about">About</a><a href="#" data-nav="programs">Programs</a><a href="#" data-nav="events">Events</a><a href="#" data-nav="contact">Contact</a>
+      </div>
+    </div>
+    <div class="ft-copy">© 2026 FED KIIT. All rights reserved. Built with 🧡</div>
+  </footer>
+</div>
+
+<!-- ═══════════════ PROGRAMS PAGE ═══════════════ -->
+<div class="page" id="page-programs">
+  <div class="prog-hero">
+    <div style="max-width:1200px;margin:0 auto;">
+      <div class="s-lbl2">What We Offer</div>
+      <h1 style="font-family:var(--font-h);font-size:clamp(2.5rem,6vw,5rem);font-weight:800;letter-spacing:-.03em;margin:16px 0;">Programs That <span style="color:var(--orange)">Transform</span></h1>
+      <p style="color:var(--text-dim);max-width:560px;font-size:1.05rem;line-height:1.8;">Every program at FED is built to equip you with real skills, real connections, and a real shot at building something great.</p>
+    </div>
+  </div>
+  <div class="prog-grid rev">
+    <div class="p-card feat"><div class="p-ico">🏆</div><h3>Bizz Battle — Flagship</h3><p>The ultimate entrepreneurship challenge at KIIT. Multi-round format covering ideation, market research, financial modelling, and investor pitching. Compete with the best minds in the university and pitch directly to real investors.</p><p style="margin-top:12px;font-size:.82rem;color:var(--text-dim);">Multi-round competition · Real investor pitches · Cash prizes · Certificates · LinkedIn recognition</p><div class="p-tag">Flagship · Annual</div></div>
+    <div class="p-card"><div class="p-ico">🧠</div><h3>Mentorship Program</h3><p>Get matched with industry leaders and serial entrepreneurs for 1-on-1 and group mentorship sessions tailored to your venture or career goals.</p><div class="p-tag">Ongoing Enrollment</div></div>
+    <div class="p-card"><div class="p-ico">🛠️</div><h3>Skill Development Workshops</h3><p>Hands-on sessions covering UI/UX design, product management, pitching, digital marketing, financial modeling, and more. Led by practitioners.</p><div class="p-tag">Monthly</div></div>
+    <div class="p-card"><div class="p-ico">🌱</div><h3>Startup Incubation</h3><p>Apply for FED's incubation track and get access to KIIT TBI's co-working space, seed funding guidance, legal support, and expert network.</p><div class="p-tag">Apply Now</div></div>
+    <div class="p-card"><div class="p-ico">🔗</div><h3>Industry Connect</h3><p>Quarterly networking events, fireside chats, and panel discussions with founders, CXOs, VCs, and investors from across India.</p><div class="p-tag">Quarterly</div></div>
+    <div class="p-card"><div class="p-ico">📚</div><h3>Knowledge Series</h3><p>Curated learning content — case studies, research breakdowns, and thought leadership from the FED community and guest contributors.</p><div class="p-tag">Weekly</div></div>
+    <div class="p-card"><div class="p-ico">🤝</div><h3>Collaboration Hub</h3><p>Connect with co-founders, collaborators, designers, and developers within the KIIT ecosystem to bring your ideas to life.</p><div class="p-tag">Open Access</div></div>
+    <div class="p-card"><div class="p-ico">🌍</div><h3>National Competitions</h3><p>FED nominates and supports KIIT students for national-level entrepreneurship competitions, hackathons, and pitch events.</p><div class="p-tag">Selective</div></div>
+  </div>
+  <footer>
+    <div class="ft-inner">
+      <div><div class="ft-logo">FED<span>KIIT</span></div><div class="ft-sub">Federation of Entrepreneurship Development · KIIT TBI</div></div>
+      <div class="ft-links"><a href="#" data-nav="home">Home</a><a href="#" data-nav="about">About</a><a href="#" data-nav="programs">Programs</a><a href="#" data-nav="events">Events</a><a href="#" data-nav="contact">Contact</a></div>
+    </div>
+    <div class="ft-copy">© 2026 FED KIIT. All rights reserved.</div>
+  </footer>
+</div>
+
+<!-- ═══════════════ EVENTS PAGE ═══════════════ -->
+<div class="page" id="page-events">
+  <div class="ev-hero">
+    <div style="max-width:900px;margin:0 auto;">
+      <div class="s-lbl2">Calendar</div>
+      <h1 style="font-family:var(--font-h);font-size:clamp(2.5rem,6vw,5rem);font-weight:800;letter-spacing:-.03em;margin:16px 0;">Events That <span style="color:var(--orange)">Shape</span> You</h1>
+      <p style="color:var(--text-dim);font-size:1.05rem;line-height:1.8;">From pitch battles to founder fireside chats — every FED event is an experience designed to push you forward.</p>
+    </div>
+  </div>
+  <div class="ev-timeline">
+    <div class="ev-item rev">
+      <div class="ev-dot">🏆</div>
+      <div class="ev-body">
+        <div class="ev-tag">📅 2026 · Upcoming</div>
+        <h3>Bizz Battle Season 2026</h3>
+        <p>The most anticipated entrepreneurship showdown at KIIT returns. Form your team, sharpen your business plan, and compete for real investment opportunities across thrilling rounds of ideation, market research, and live pitching.</p>
+        <div class="ev-meta"><span>📍 KIIT University, Bhubaneswar</span><span>👥 All KIIT students</span><span>🏅 Cash prizes + Mentorship</span></div>
+        <a href="#" class="btn-p" data-nav="contact" style="margin-top:20px;display:inline-flex;padding:12px 28px;font-size:.85rem;">Register Interest →</a>
+      </div>
+    </div>
+    <div class="ev-item rev">
+      <div class="ev-dot">🎨</div>
+      <div class="ev-body">
+        <div class="ev-tag">✅ 2026 · Completed</div>
+        <h3>FED UI/UX Design Challenge 2026</h3>
+        <p>Participants designed a responsive, visually compelling homepage for the FED official website. Led by Mr. Punit Chawla — this challenge blended design thinking with real entrepreneurial branding challenges.</p>
+        <div class="ev-meta"><span>📍 KIIT University</span><span>🎯 UI/UX · Branding · Web Design</span></div>
+      </div>
+    </div>
+    <div class="ev-item rev">
+      <div class="ev-dot">🚀</div>
+      <div class="ev-body">
+        <div class="ev-tag">📅 2026 · Upcoming</div>
+        <h3>Startup Ideation Bootcamp</h3>
+        <p>A 48-hour intensive experience where student teams ideate, validate, and prototype real startup concepts. Expert coaches, mentor office hours, and live feedback sessions throughout.</p>
+        <div class="ev-meta"><span>📍 KIIT TBI</span><span>⏱ 48 Hours</span><span>👥 Teams of 3–5</span></div>
+      </div>
+    </div>
+    <div class="ev-item rev">
+      <div class="ev-dot">💼</div>
+      <div class="ev-body">
+        <div class="ev-tag">📅 2026 · Upcoming</div>
+        <h3>Investor Pitch Night</h3>
+        <p>Selected FED teams get the opportunity to pitch their startup ideas directly to a curated panel of investors, angel networks, and seasoned entrepreneurship mentors.</p>
+        <div class="ev-meta"><span>📍 KIIT Campus</span><span>🎯 Selective · Apply Required</span></div>
+      </div>
+    </div>
+    <div class="ev-item rev">
+      <div class="ev-dot">🌟</div>
+      <div class="ev-body">
+        <div class="ev-tag">📅 2026 · Annual</div>
+        <h3>FED Annual Summit</h3>
+        <p>FED's flagship community event — a full-day experience featuring keynote talks, panel discussions, startup showcases, award ceremonies, and networking with the entire KIIT entrepreneurship ecosystem.</p>
+        <div class="ev-meta"><span>📍 KIIT University</span><span>👥 Open to All</span><span>🏅 Awards & Recognition</span></div>
+      </div>
+    </div>
+    <div class="ev-item rev">
+      <div class="ev-dot">🤝</div>
+      <div class="ev-body">
+        <div class="ev-tag">📅 Quarterly</div>
+        <h3>Industry Connect Sessions</h3>
+        <p>Regular networking events and fireside chats with founders, CXOs, and investors. These intimate sessions give students direct access to industry insights and relationship building.</p>
+        <div class="ev-meta"><span>📍 Various Venues</span><span>📆 Quarterly</span></div>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="ft-inner">
+      <div><div class="ft-logo">FED<span>KIIT</span></div><div class="ft-sub">Federation of Entrepreneurship Development · KIIT TBI</div></div>
+      <div class="ft-links"><a href="#" data-nav="home">Home</a><a href="#" data-nav="about">About</a><a href="#" data-nav="programs">Programs</a><a href="#" data-nav="events">Events</a><a href="#" data-nav="contact">Contact</a></div>
+    </div>
+    <div class="ft-copy">© 2026 FED KIIT. All rights reserved.</div>
+  </footer>
+</div>
+
+<!-- ═══════════════ CONTACT PAGE ═══════════════ -->
+<div class="page" id="page-contact">
+  <div class="con-hero">
+    <div class="s-lbl2" style="justify-content:center;">Get In Touch</div>
+    <h1>Ready to Build <span style="color:var(--orange)">Something</span> Great?</h1>
+    <p style="color:var(--text-dim);max-width:520px;margin:0 auto;font-size:1.05rem;line-height:1.8;">Whether you're a student, mentor, or industry partner — FED welcomes you. Reach out and become part of the ecosystem.</p>
+  </div>
+  <div class="con-body">
+    <div class="rev">
+      <div class="s-lbl2">Find Us</div>
+      <h2 class="s-title">Connect With <span style="color:var(--orange)">FED</span></h2>
+      <div class="con-links">
+        <a href="https://www.fedkiit.com" class="con-link" target="_blank"><div class="con-ico">🌐</div><div><strong>Website</strong><span>fedkiit.com</span></div></a>
+        <a href="#" class="con-link"><div class="con-ico">📸</div><div><strong>Instagram</strong><span>@fedkiit</span></div></a>
+        <a href="#" class="con-link"><div class="con-ico">💼</div><div><strong>LinkedIn</strong><span>FED KIIT</span></div></a>
+        <a href="#" class="con-link"><div class="con-ico">▶️</div><div><strong>YouTube</strong><span>Federation KIIT</span></div></a>
+        <a href="#" class="con-link"><div class="con-ico">📍</div><div><strong>Location</strong><span>KIIT TBI, Bhubaneswar, Odisha — 751024</span></div></a>
+      </div>
+    </div>
+    <div class="rev" style="transition-delay:.2s;">
+      <div class="s-lbl2">Say Hello</div>
+      <h2 class="s-title" style="margin-bottom:28px;">Drop Us a <span style="color:var(--orange)">Message</span></h2>
+      <div class="con-form">
+        <div class="f-row">
+          <div class="f-field"><label>First Name</label><input type="text" placeholder="Arjun"/></div>
+          <div class="f-field"><label>Last Name</label><input type="text" placeholder="Sharma"/></div>
+        </div>
+        <div class="f-field"><label>Email Address</label><input type="email" placeholder="you@kiit.ac.in"/></div>
+        <div class="f-field"><label>Roll Number</label><input type="text" placeholder="22BECE0000"/></div>
+        <div class="f-field">
+          <label>I'm Interested In</label>
+          <select>
+            <option value="">Select a program...</option>
+            <option>Bizz Battle 2026</option>
+            <option>Mentorship Program</option>
+            <option>Skill Workshops</option>
+            <option>Startup Incubation</option>
+            <option>General Membership</option>
+          </select>
+        </div>
+        <div class="f-field"><label>Message</label><textarea placeholder="Tell us about your idea or what you're looking for..."></textarea></div>
+        <button class="btn-sub" onclick="this.textContent='Message Sent! 🎉';this.style.background='#22c55e';">Send Message →</button>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="ft-inner">
+      <div><div class="ft-logo">FED<span>KIIT</span></div><div class="ft-sub">Federation of Entrepreneurship Development · KIIT TBI</div></div>
+      <div class="ft-links"><a href="#" data-nav="home">Home</a><a href="#" data-nav="about">About</a><a href="#" data-nav="programs">Programs</a><a href="#" data-nav="events">Events</a><a href="#" data-nav="contact">Contact</a></div>
+    </div>
+    <div class="ft-copy">© 2026 FED KIIT. All rights reserved. Built with 🧡</div>
+  </footer>
+</div>
+
+<script>
+/* ── CURSOR ── */
+const cur=document.getElementById('cur'),ring=document.getElementById('cur-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.transform=`translate(${mx}px,${my}px) translate(-50%,-50%)`;});
+(function animRing(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.transform=`translate(${rx}px,${ry}px) translate(-50%,-50%)`;requestAnimationFrame(animRing);})();
+document.querySelectorAll('a,button,input,textarea,select').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='54px';ring.style.height='54px';ring.style.opacity='.9';});
+  el.addEventListener('mouseleave',()=>{ring.style.width='34px';ring.style.height='34px';ring.style.opacity='.5';});
+});
+
+/* ── SCROLL PROGRESS ── */
+const progBar=document.getElementById('prog');
+window.addEventListener('scroll',()=>{
+  const p=window.scrollY/(document.body.scrollHeight-window.innerHeight)*100;
+  progBar.style.width=p+'%';
+});
+
+/* ── NAVBAR ── */
+const nav=document.getElementById('navbar');
+window.addEventListener('scroll',()=>nav.classList.toggle('sc',window.scrollY>60));
+
+/* ── THEME ── */
+const themeBtn=document.getElementById('themeBtn');
+themeBtn.addEventListener('click',()=>{
+  const d=document.documentElement;const dark=d.getAttribute('data-theme')==='dark';
+  d.setAttribute('data-theme',dark?'light':'dark');themeBtn.textContent=dark?'☀️':'🌙';
+});
+
+/* ── PAGE NAVIGATION ── */
+function goTo(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const target=document.getElementById('page-'+page);
+  if(target){target.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+  document.querySelectorAll('[data-nav]').forEach(a=>{
+    a.classList.remove('active');
+    if(a.classList.contains('n-links') || a.closest('.n-links')){}
+  });
+  document.querySelectorAll('.n-links [data-nav]').forEach(a=>{
+    a.classList.toggle('active',a.getAttribute('data-nav')===page);
+  });
+  // reinit reveal
+  setTimeout(()=>{
+    target.querySelectorAll('.rev').forEach(el=>revObs.observe(el));
+    target.querySelectorAll('[data-count]').forEach(el=>countObs.observe(el));
+  },100);
+}
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-nav]');
+  if(el){e.preventDefault();goTo(el.getAttribute('data-nav'));closeMob();}
+});
+
+/* ── HAMBURGER ── */
+const hamBtn=document.getElementById('hamBtn'),mobNav=document.getElementById('mobNav');
+let mobOpen=false;
+function closeMob(){mobOpen=false;mobNav.classList.remove('open');hamBtn.querySelectorAll('span').forEach((s,i)=>{s.style.transform='';s.style.opacity='1';});}
+hamBtn.addEventListener('click',()=>{
+  mobOpen=!mobOpen;mobNav.classList.toggle('open',mobOpen);
+  const s=hamBtn.querySelectorAll('span');
+  s[0].style.transform=mobOpen?'rotate(45deg) translate(5px,5px)':'';
+  s[1].style.opacity=mobOpen?'0':'1';
+  s[2].style.transform=mobOpen?'rotate(-45deg) translate(5px,-5px)':'';
+});
+
+/* ── SCROLL REVEAL ── */
+const revObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');revObs.unobserve(e.target);}});},{threshold:.1});
+document.querySelectorAll('.rev').forEach(el=>revObs.observe(el));
+
+/* ── COUNTERS ── */
+const countObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(!e.isIntersecting)return;
+    const el=e.target,target=+el.dataset.count;let start=0;
+    const tick=ts=>{if(!start)start=ts;const p=Math.min((ts-start)/2000,1),ease=1-Math.pow(1-p,3);
+      el.textContent=Math.floor(ease*target)+'+';if(p<1)requestAnimationFrame(tick);else el.textContent=target+'+';};
+    requestAnimationFrame(tick);countObs.unobserve(el);
+  });
+},{threshold:.5});
+document.querySelectorAll('[data-count]').forEach(c=>countObs.observe(c));
+
+/* ── HERO CANVAS ── */
+const canvas=document.getElementById('hero-canvas'),ctx=canvas.getContext('2d');
+let W,H,pts=[];
+function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;}
+resize();window.addEventListener('resize',resize);
+class P{constructor(){this.reset();}reset(){this.x=Math.random()*W;this.y=Math.random()*H;this.r=Math.random()*1.4+.3;this.vx=(Math.random()-.5)*.4;this.vy=(Math.random()-.5)*.4;this.life=Math.random();this.ml=.4+Math.random()*.4;}update(){this.x+=this.vx;this.y+=this.vy;this.life+=.003;if(this.x<0||this.x>W||this.y<0||this.y>H||this.life>this.ml)this.reset();}draw(){const a=Math.sin(this.life/this.ml*Math.PI)*.55;ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,107,0,${a})`;ctx.fill();}}
+for(let i=0;i<130;i++)pts.push(new P());
+function drawLines(){for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<95){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle=`rgba(255,107,0,${(1-d/95)*.1})`;ctx.lineWidth=.8;ctx.stroke();}}}
+(function anim(){ctx.clearRect(0,0,W,H);pts.forEach(p=>{p.update();p.draw();});drawLines();requestAnimationFrame(anim);})();
+</script>
+</body>
+</html>
